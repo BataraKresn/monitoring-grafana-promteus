@@ -1,0 +1,32 @@
+groups:
+  - name: web.rules
+    rules:
+      - alert: InvalidHTTPStatusCode
+        expr: probe_http_status_code != 200
+        for: 30s
+        labels:
+          severity: critical
+          alert_type: web
+        annotations:
+          summary: "🚨 Invalid HTTP status on {{ $labels.instance }}"
+          description: "Expected HTTP 200, but got {{ $value }} from {{ $labels.instance }}."
+
+      - alert: CertificateValidity28Days
+        expr: (probe_ssl_earliest_cert_expiry - time()) < (60 * 60 * 24 * 28)
+        for: 1m
+        labels:
+          severity: warning
+          alert_type: web
+        annotations:
+          summary: "⚠️ SSL cert < 28 days ({{ $labels.instance }})"
+          description: "SSL certificate for {{ $labels.instance }} will expire within 28 days."
+
+      - alert: CertificateValidity10Days
+        expr: (probe_ssl_earliest_cert_expiry - time()) < (60 * 60 * 24 * 10)
+        for: 1m
+        labels:
+          severity: critical
+          alert_type: web
+        annotations:
+          summary: "🚨 SSL cert < 10 days ({{ $labels.instance }})"
+          description: "SSL certificate for {{ $labels.instance }} will expire in less than 10 days. Renew immediately."

@@ -1,0 +1,59 @@
+# route:
+#   receiver: "email-alert"
+#   group_wait: 10s
+#   group_interval: 1m
+#   repeat_interval: 1h
+#   routes:
+#     - receiver: "telegram-alert"
+
+# receivers:
+#   - name: "email-alert"
+#     email_configs:
+#       - to: "bigdata0124@gmail.com"
+#         from: "sysadmin.app@sateknologi.id"
+#         smarthost: "smtp.gmail.com:587"  # Alamat SMTP Google dengan port 587
+#         auth_username: "sysadmin.app@sateknologi.id"
+#         auth_password: "vnok jirl tphq mpbr"  # Password aplikasi Google (gunakan app password jika 2FA diaktifkan)
+#         require_tls: true
+#   - name: "telegram-alert"  
+#     telegram_configs:
+#       - bot_token: "7741029849:AAGBWKvUIEz8-klU9UXmgOf0V7LnqwWfrgQ"  # Ganti dengan token bot Anda
+#         chat_id: -4637393629  # Ganti dengan chat_id grup
+#         send_resolved: true
+
+global:
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'sysadmin.app@sateknologi.id'
+  smtp_auth_username: 'sysadmin.app@sateknologi.id'
+  smtp_auth_password: 'vnok jirl tphq mpbr'
+  smtp_require_tls: true
+
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 1h
+  receiver: 'email-alert'
+  routes:
+    - receiver: 'telegram-alert'
+      match:
+        severity: 'critical|page'  # Optional: hanya forward ke Telegram jika severity=critical
+      continue: true          # Penting agar email tetap dikirim setelah telegram
+
+receivers:
+  - name: 'email-alert'
+    email_configs:
+      - to: 'bigdata0124@gmail.com'
+
+  - name: 'telegram-alert'
+    telegram_configs:
+      - bot_token: '7741029849:AAGBWKvUIEz8-klU9UXmgOf0V7LnqwWfrgQ'
+        chat_id: -4637393629
+        send_resolved: true
+        parse_mode: 'Markdown'
+        message: |-
+          🔔 *{{ .CommonLabels.alertname }}*
+          {{ range .Alerts }}
+          • *Status*: `{{ .Status }}`
+          • *Summary*: {{ .Annotations.summary }}
+          {{ end }}

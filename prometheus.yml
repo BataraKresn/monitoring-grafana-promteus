@@ -1,0 +1,49 @@
+global:
+  scrape_interval: 1m
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - "192.168.11.103:9093"  # Sesuaikan dengan nama container dan port alertmanager
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["192.168.11.103:9090"]
+
+  - job_name: "Server Monitor MPP"
+    static_configs:
+      - targets: [
+          "proxy-nginx-mpp:9100",
+          "api-mpp:9200",
+          "mpp-api02:9300",
+          "nginx-proxy-manager:9400"
+        ]
+  
+  - job_name: "Monitoring Docker Metrics"
+    static_configs:
+      - targets: [
+          "192.168.11.129:8080",
+          "192.168.11.127:8080"
+        ]
+  
+  - job_name: "mktxp"
+    static_configs:
+      - targets: ["192.168.11.103:49090"]
+          
+  # - job_name: 'mikrotik'
+  #   static_configs:
+  #     - targets: ['mikrotik-exporter:9436']
+
+#   - job_name: "svr-monitor_media-mining"
+#     static_configs:
+#       - targets: [
+#           "mm-s2t-01:9711",
+#           "mm-s2t-02:9712",
+#           "mm-processing:9713",
+#           "mm-db:9714",
+#           "mm-storageMinIo:9715",
+#           "mm-media-broadcasting:9716",
+#           "sysadmin-vm:9717"
+#         ]

@@ -1,0 +1,73 @@
+groups:
+- name: Alert-Services
+  rules:
+
+  - alert: ServiceDown
+    expr: up == 0
+    for: 30s
+    labels:
+      severity: critical
+      alert_type: infra
+    annotations:
+      summary: "🚨 {{ $labels.instance }} is down"
+      description: "❌ The target {{ $labels.instance }} (job={{ $labels.job }}) has been unreachable for more than 30 seconds."
+
+  - alert: HighLoad
+    expr: node_load1 > 0.5
+    for: 30s
+    labels:
+      severity: warning
+      alert_type: infra
+    annotations:
+      summary: "⚠️ High load on {{ $labels.instance }}"
+      description: "The load on {{ $labels.instance }} (job={{ $labels.job }}) exceeded 0.5."
+
+  - alert: CPUUsageHigh
+    expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+    for: 1m
+    labels:
+      severity: warning
+      alert_type: infra
+    annotations:
+      summary: "⚠️ High CPU usage on {{ $labels.instance }}"
+      description: "CPU usage on {{ $labels.instance }} exceeded 85% for over 1 minute."
+
+  - alert: MemoryUsageHigh
+    expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+    for: 1m
+    labels:
+      severity: warning
+      alert_type: infra
+    annotations:
+      summary: "⚠️ High memory usage on {{ $labels.instance }}"
+      description: "Memory usage on {{ $labels.instance }} exceeded 90% for over 1 minute."
+
+  - alert: DiskSpaceLow
+    expr: (node_filesystem_size_bytes{fstype!~"tmpfs"} - node_filesystem_avail_bytes{fstype!~"tmpfs"}) / node_filesystem_size_bytes{fstype!~"tmpfs"} * 100 > 90
+    for: 2m
+    labels:
+      severity: warning
+      alert_type: infra
+    annotations:
+      summary: "⚠️ Low disk space on {{ $labels.instance }}"
+      description: "{{ $labels.instance }} has more than 90% of its disk full."
+
+  - alert: DiskIOHigh
+    expr: rate(node_disk_io_time_seconds_total[1m]) > 0.8
+    for: 2m
+    labels:
+      severity: warning
+      alert_type: infra
+    annotations:
+      summary: "⚠️ High disk IO on {{ $labels.instance }}"
+      description: "Disk IO usage on {{ $labels.instance }} exceeded 80% for 2 minutes."
+
+  - alert: NetworkTrafficHigh
+    expr: rate(node_network_receive_bytes_total[1m]) > 100000000 OR rate(node_network_transmit_bytes_total[1m]) > 100000000
+    for: 1m
+    labels:
+      severity: warning
+      alert_type: infra
+    annotations:
+      summary: "⚠️ High network traffic on {{ $labels.instance }}"
+      description: "Network traffic exceeded 100 MB/s on {{ $labels.instance }}."
