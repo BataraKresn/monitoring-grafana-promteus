@@ -1,0 +1,8 @@
+# PM2 services monitoring targets
+# PM2 exporter typically runs on port 9209
+- targets:
+  - "100.64.0.1:9209"    # Server 1 PM2 exporter
+  - "100.64.0.2:9209"    # Server 2 PM2 exporter
+  - "100.64.0.3:9209"    # Server 3 PM2 exporter
+  labels:
+    job: "pm2-services"

@@ -1,0 +1,17 @@
+# Docker container monitoring targets
+# cAdvisor for Docker metrics (port 8080)
+- targets:
+  - "100.97.154.70:8080"    # Server 1 Baremetal-Backend
+  - "100.119.147.118:8080"    # Server 2 Baremetal-Frontend
+  - "100.92.125.27:8080"    # Server 3 Contabo-1
+  - "100.73.222.94:8080"    # Server 4 Baremetal-DataCenter
+  labels:
+    job: "docker-cadvisor"
+    
+# Docker daemon metrics (if enabled on port 9323)
+- targets:
+  - "100.64.0.1:9323"    # Server 1 Docker daemon
+  - "100.64.0.2:9323"    # Server 2 Docker daemon
+  - "100.64.0.3:9323"    # Server 3 Docker daemon
+  labels:
+    job: "docker-daemon"

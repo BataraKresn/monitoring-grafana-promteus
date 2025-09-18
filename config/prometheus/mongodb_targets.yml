@@ -1,0 +1,12 @@
+# MongoDB targets for database monitoring
+# Single MongoDB instance (not replica set)
+- targets:
+  - "100.73.222.94:27017"  # MongoDB Single Instance (DataCenter)
+  labels:
+    job: "mongodb-single"
+    
+# MongoDB exporter for detailed metrics (if installed)
+- targets:
+  - "100.73.222.94:9216"   # MongoDB Exporter
+  labels:
+    job: "mongodb-exporter"

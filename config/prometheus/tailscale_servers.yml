@@ -1,0 +1,9 @@
+# Tailscale server IPs for monitoring via node_exporter
+# Replace these with your actual Tailscale IPs (port 9100 for node_exporter)
+- targets:
+  - "100.97.154.70:9100"    # Server 1 Baremetal-Backend
+  - "100.119.147.118:9100"    # Server 2 Baremetal-Frontend
+  - "100.92.125.27:9100"    # Server 3 Contabo-1
+  - "100.73.222.94:9100"    # Server 4 Baremetal-DataCenter
+  labels:
+    job: "tailscale-servers"

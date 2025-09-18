@@ -4,16 +4,16 @@ services:
     container_name: prometheus
     restart: always
     ports:
-      - "192.168.11.103:9090:9090"
+      - "9090:9090"
     user: nobody
     volumes:
       - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
-      - ./config/prometheus/server_targets.yml:/etc/prometheus/server_targets.yml
-      - ./config/prometheus/http_websites.yml:/etc/prometheus/http_websites.yml
-      # - ./config/prometheus/icmp-websites.yml:/etc/prometheus/icmp-websites.yml
+      - ./config/prometheus/tailscale_servers.yml:/etc/prometheus/tailscale_servers.yml
+      - ./config/prometheus/docker_targets.yml:/etc/prometheus/docker_targets.yml
+      - ./config/prometheus/pm2_targets.yml:/etc/prometheus/pm2_targets.yml
+      - ./config/prometheus/mongodb_targets.yml:/etc/prometheus/mongodb_targets.yml
       - ./config/prometheus/rules:/etc/prometheus/rules
-      - /home/ubuntu/monitoring/prometheus_data:/prometheus
+      - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -28,57 +28,20 @@ services:
       interval: 30s
       retries: 3
       start_period: 10s
-    extra_hosts:
-      - "api-mpp:192.168.11.129"
-      - "mpp-api02:192.168.11.127"
-      - "nginx-proxy-manager:192.168.11.130"
-      - "proxy-nginx-mpp:192.168.11.110"
-      - "sistembali-migrasi:192.168.11.72"
-      - "db-pdip-prod:192.168.11.63"
-      - "db-mpp-prod:192.168.11.121"
-      - "minio-pdip-kreatif:192.168.11.106"
-      - "minio-mpp:192.168.11.118"
-      - "minio-mpp-replica:192.168.11.119"
-      - "cms-mpp:192.168.11.178"
-      - "pgpool:100.82.8.83"
-      - "db-dev01:100.81.1.111"
-      - "db-dev02:100.77.74.98"
-      - "stg-pdip:192.168.11.131"
-      - "stg-kreatif:192.168.11.132"
-      - "prod-kreatif:192.168.11.31"
 
-  blackbox-exporter:
-    image: "prom/blackbox-exporter:latest"
-    container_name: blackbox-exporter
-    hostname: "blackbox"
-    restart: always
-    ports:
-    - "192.168.11.103:9115:9115"
-    volumes:
-    - "./config/blackbox-exporter/blackbox-exporter.yml:/etc/prometheus/blackbox-exporter.yml"
-    command:
-    - "--config.file=/etc/prometheus/blackbox-exporter.yml"
-    networks:
-      - monitoring-net
+
 
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
     restart: always
     ports:
-      - "192.168.11.103:3000:3000"
+      - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin  # Ganti password default
+      - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_SERVER_DOMAIN=grafana.sateknologi.id
-      - GF_SERVER_ROOT_URL=http://grafana.sateknologi.id/
-      - GF_SMTP_ENABLED=true
-      - GF_SMTP_HOST=smtp.gmail.com:587
-      - GF_SMTP_USER=sysadmin.app@sateknologi.id
-      - GF_SMTP_PASSWORD=${GF_SMTP_PASSWORD}
-      - GF_SMTP_FROM_ADDRESS=sysadmin.app@sateknologi.id
     volumes:
-      - /home/ubuntu/monitoring/grafana-storage:/var/lib/grafana
+      - grafana_data:/var/lib/grafana
       - ./config/grafana/provisioning:/etc/grafana/provisioning
     networks:
       - monitoring-net
@@ -93,14 +56,13 @@ services:
     container_name: alertmanager
     restart: always
     ports:
-      - "192.168.11.103:9093:9093"
+      - "9093:9093"
     volumes:
       - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
-      # - --storage.path=/alertmanager
-    env_file:
-      - .env
+      - alertmanager_data:/alertmanager
     command:
       - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
     networks:
       - monitoring-net
     healthcheck:
@@ -109,6 +71,11 @@ services:
       retries: 3
       start_period: 10s
 
+volumes:
+  prometheus_data:
+  grafana_data:
+  alertmanager_data:
+
 networks:
   monitoring-net:
-    external: true
+    driver: bridge
